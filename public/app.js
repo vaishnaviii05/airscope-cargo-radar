@@ -933,29 +933,71 @@ showView(window.location.hash === "#dashboard" ? "dashboard" : "front");
 loadAircraft();
 state.refreshTimer = setInterval(loadAircraft, 20000);
 
+// =========================
+// RESIZABLE TRACKING PANEL
+// =========================
+
 const resizeHandle = document.getElementById("resizeHandle");
 const trackingCard = document.querySelector(".tracking-card");
 
-let isResizing = false;
+if (resizeHandle && trackingCard) {
 
-resizeHandle.addEventListener("mousedown", () => {
-    isResizing = true;
-});
+    // Restore saved width
+    const savedWidth = localStorage.getItem("panelWidth");
 
-document.addEventListener("mousemove", (e) => {
-    if (!isResizing) return;
+    if (savedWidth) {
+        trackingCard.style.width = `${savedWidth}px`;
+        resizeHandle.style.left = `${156 + Number(savedWidth)}px`;
+    }
 
-    let newWidth = e.clientX - 156;
+    let isResizing = false;
 
-    newWidth = Math.max(300, Math.min(newWidth, 700));
+    // Desktop support
+    resizeHandle.addEventListener("mousedown", () => {
+        isResizing = true;
+    });
 
-    trackingCard.style.width = `${newWidth}px`;
+    document.addEventListener("mousemove", (e) => {
+        if (!isResizing) return;
 
-    resizeHandle.style.left = `${156 + newWidth}px`;
+        let newWidth = e.clientX - 156;
 
-    localStorage.setItem("panelWidth", newWidth);
-});
+        newWidth = Math.max(300, Math.min(newWidth, 700));
 
-document.addEventListener("mouseup", () => {
-    isResizing = false;
-});
+        trackingCard.style.width = `${newWidth}px`;
+        resizeHandle.style.left = `${156 + newWidth}px`;
+
+        localStorage.setItem("panelWidth", newWidth);
+    });
+
+    document.addEventListener("mouseup", () => {
+        isResizing = false;
+    });
+
+    // Mobile support
+    resizeHandle.addEventListener("touchstart", () => {
+        isResizing = true;
+    });
+
+    document.addEventListener("touchmove", (e) => {
+        if (!isResizing) return;
+
+        const touch = e.touches[0];
+
+        let newWidth = touch.clientX - 156;
+
+        newWidth = Math.max(
+            250,
+            Math.min(newWidth, window.innerWidth - 40)
+        );
+
+        trackingCard.style.width = `${newWidth}px`;
+        resizeHandle.style.left = `${156 + newWidth}px`;
+
+        localStorage.setItem("panelWidth", newWidth);
+    });
+
+    document.addEventListener("touchend", () => {
+        isResizing = false;
+    });
+}

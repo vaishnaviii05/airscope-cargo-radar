@@ -1197,9 +1197,23 @@ body.light-map #map .leaflet-tile-pane {
   z-index: 700;
   cursor: ew-resize;
   background: rgba(255,255,255,0.08);
+  touch-action: none;
   transition: background 0.2s;
 }
 
 .resize-handle:hover {
   background: rgba(246,196,0,0.7);
+}
+
+@media (max-width: 768px) {
+
+  .tracking-card {
+    left: 0;
+    width: 85vw;
+    max-width: 350px;
+  }
+
+  .resize-handle {
+    display: none;
+  }
 }
