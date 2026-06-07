@@ -1,0 +1,21 @@
+{
+  "name": "live-aircraft-tracker",
+  "version": "1.0.0",
+  "description": "Real-life aircraft tracking dashboard with live OpenSky API data, 2D map, and flight trails.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "aircraft",
+    "tracking",
+    "opensky",
+    "ads-b",
+    "leaflet",
+    "map"
+  ],
+  "author": "",
+  "license": "MIT"
+}

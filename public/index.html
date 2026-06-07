@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AirScope Cargo Radar</title>
+    <link rel="preconnect" href="https://tile.openstreetmap.org">
+    <link rel="preconnect" href="https://a.basemaps.cartocdn.com">
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app-tabs" role="tablist" aria-label="Application views">
+      <button class="app-tab active" id="frontTab" type="button" role="tab" aria-selected="true" aria-controls="frontPage">Front Page</button>
+      <button class="app-tab" id="dashboardTab" type="button" role="tab" aria-selected="false" aria-controls="dashboardView">Live Dashboard</button>
+    </div>
+
+    <section class="front-page active" id="frontPage" role="tabpanel" aria-labelledby="frontTab">
+      <div class="front-grid" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="front-radar" aria-hidden="true">
+        <div class="radar-ring ring-one"></div>
+        <div class="radar-ring ring-two"></div>
+        <div class="radar-ring ring-three"></div>
+        <div class="radar-sweep"></div>
+        <div class="front-plane plane-a">
+          <svg viewBox="0 0 64 64"><path d="M32 4 38 27 58 36 58 43 36 40 36 51 44 57 44 61 32 57 20 61 20 57 28 51 28 40 6 43 6 36 26 27Z"></path></svg>
+        </div>
+        <div class="front-plane plane-b">
+          <svg viewBox="0 0 64 64"><path d="M32 4 38 27 58 36 58 43 36 40 36 51 44 57 44 61 32 57 20 61 20 57 28 51 28 40 6 43 6 36 26 27Z"></path></svg>
+        </div>
+        <div class="front-plane plane-c">
+          <svg viewBox="0 0 64 64"><path d="M32 4 38 27 58 36 58 43 36 40 36 51 44 57 44 61 32 57 20 61 20 57 28 51 28 40 6 43 6 36 26 27Z"></path></svg>
+        </div>
+      </div>
+
+      <div class="front-copy">
+        <div class="front-kicker">Live ADS-B tracking system</div>
+        <h1>AirScope Cargo Radar</h1>
+        <p>Monitor aircraft movement, selected-flight route corridors, live telemetry, and cargo-style tracking from one dark operations screen.</p>
+        <div class="front-actions">
+          <button id="openDashboardButton" class="primary-action" type="button">Open Live Dashboard</button>
+          <button id="frontRefreshButton" class="secondary-action" type="button">Refresh Feed</button>
+        </div>
+      </div>
+
+      <div class="front-stats" aria-label="Live system summary">
+        <article>
+          <span>Live Feed</span>
+          <strong id="frontSource">Connecting</strong>
+        </article>
+        <article>
+          <span>Aircraft</span>
+          <strong id="frontAircraft">0</strong>
+        </article>
+        <article>
+          <span>On Map</span>
+          <strong id="frontDrawn">0</strong>
+        </article>
+      </div>
+    </section>
+
+    <main class="radar-shell" id="dashboardView" role="tabpanel" aria-labelledby="dashboardTab">
+      <div id="map" aria-label="Live aircraft radar map"></div>
+      <canvas id="radarCanvas" aria-hidden="true"></canvas>
+
+      <header class="top-nav">
+        <div class="nav-spacer"></div>
+        <nav aria-label="Utility links">
+          <a href="#">Prohibited goods</a>
+          <a href="#">Partners</a>
+          <a href="#">Contact</a>
+        </nav>
+        <div class="nav-actions">
+          <button id="themeButton" class="round-button" type="button" title="Theme" aria-label="Theme">C</button>
+          <button id="refreshButton" class="round-button" type="button" title="Refresh" aria-label="Refresh">R</button>
+          <button id="trailButton" class="round-button active" type="button" title="Trails" aria-label="Trails">T</button>
+        </div>
+      </header>
+
+      <aside class="shipment-rail" aria-label="Live flight timeline">
+        <div class="rail-tools">
+          <button class="tool-button" type="button" title="Filter" aria-label="Filter">F</button>
+          <button class="tool-button" type="button" title="More" aria-label="More">M</button>
+        </div>
+        <label class="rail-search">
+          <span class="sr-only">Search flights</span>
+          <input id="searchInput" type="search" placeholder="Search live flights" autocomplete="off">
+        </label>
+        <div id="flightList" class="timeline-list">
+          <div class="timeline-empty">Waiting for live aircraft...</div>
+        </div>
+      </aside>
+
+      <section class="tracking-card" aria-label="Selected live flight">
+        <button class="card-close" id="closeDetails" type="button" title="Clear selection" aria-label="Clear selection">X</button>
+        <div class="live-chip" id="sourceLabel">Connecting to live feed</div>
+        <div class="status-row">
+          <span id="statusDot" class="status-dot"></span>
+          <span id="selectedStatus">IN TRANSIT</span>
+          <strong id="updatedAt">--</strong>
+        </div>
+        <div class="tracking-id">
+          <span id="selectedCallsign">Select flight</span>
+          <button id="fitButton" type="button" title="Fit aircraft" aria-label="Fit aircraft">F</button>
+        </div>
+
+        <div class="plane-hero" aria-hidden="true">
+          <svg viewBox="0 0 420 180" role="img">
+            <path class="plane-shadow" d="M33 109h364v26H33z"></path>
+            <path class="wing-back" d="M118 90 19 43c-12-5-18 11-8 18l113 79h59l-33-50z"></path>
+            <path class="wing-back" d="M302 90 401 43c12-5 18 11 8 18l-113 79h-59l33-50z"></path>
+            <path class="fuselage" d="M210 10c45 0 73 53 73 97 0 28-18 55-73 55s-73-27-73-55c0-44 28-97 73-97z"></path>
+            <path class="nose" d="M164 58c18-22 74-22 92 0-11 12-28 18-46 18s-35-6-46-18z"></path>
+            <path class="window" d="M178 57c8-8 20-12 32-12s24 4 32 12c-8 5-18 8-32 8s-24-3-32-8z"></path>
+            <path class="main-wing" d="M141 102 32 116c-20 3-21 25 0 26l140 9h38l-34-49z"></path>
+            <path class="main-wing" d="M279 102 388 116c20 3 21 25 0 26l-140 9h-38l34-49z"></path>
+            <circle class="engine" cx="83" cy="139" r="25"></circle>
+            <circle class="engine" cx="337" cy="139" r="25"></circle>
+            <circle class="engine-core" cx="83" cy="139" r="14"></circle>
+            <circle class="engine-core" cx="337" cy="139" r="14"></circle>
+          </svg>
+        </div>
+
+        <div class="carrier-badge">
+          <strong>DHL</strong>
+        </div>
+        <p class="mission-title" id="missionTitle">Live aircraft position tracking</p>
+        <p class="coordinates" id="coordinateLine">Waiting for selected aircraft</p>
+
+        <div class="airport-grid">
+          <article>
+            <span>FROM</span>
+            <strong id="fromCode">LIVE</strong>
+            <small id="fromName">Current feed</small>
+            <div><span>Observed</span><b id="observedTime">--</b></div>
+          </article>
+          <article>
+            <span>TO</span>
+            <strong id="toCode">MAP</strong>
+            <small id="toName">Projected heading</small>
+            <div><span>Heading</span><b id="headingValue">--</b></div>
+          </article>
+        </div>
+
+        <div class="route-block">
+          <div class="route-top">
+            <span>Route</span>
+            <strong id="routeTimer">Live vector</strong>
+          </div>
+          <div class="route-line">
+            <span></span>
+            <i></i>
+            <span></span>
+          </div>
+          <div class="route-cities">
+            <div>
+              <strong id="originCity">OpenSky</strong>
+              <small id="originDate">Live ADS-B</small>
+            </div>
+            <div>
+              <strong id="destCity">Tracking Map</strong>
+              <small id="destDate">Refreshes every 20s</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-grid" id="flightDetails">
+          <div><span>Aircraft</span><strong id="aircraftCount">0 live</strong></div>
+          <div><span>Airborne</span><strong id="movingCount">0</strong></div>
+          <div><span>Altitude</span><strong id="avgAltitude">--</strong></div>
+          <div><span>Drawn</span><strong id="drawnCount">0</strong></div>
+        </div>
+
+        <section class="airport-directory" aria-label="Indian airport directory">
+          <div class="airport-directory-head">
+            <span>India Airports</span>
+            <strong id="airportCount">0</strong>
+          </div>
+          <div id="airportList" class="airport-list"></div>
+        </section>
+      </section>
+
+      <div class="map-controls" aria-label="Map controls">
+        <button id="zoomInButton" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+        <button id="zoomOutButton" type="button" title="Zoom out" aria-label="Zoom out">-</button>
+      </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
