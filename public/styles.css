@@ -375,7 +375,7 @@ body.light-map #map .leaflet-tile-pane {
   position: absolute;
   inset: 0;
   z-index: 420;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .leaflet-control-container {
