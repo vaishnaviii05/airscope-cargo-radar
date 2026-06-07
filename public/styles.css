@@ -564,7 +564,7 @@ body.light-map #map .leaflet-tile-pane {
   bottom: 18px;
   left: 156px;
   z-index: 610;
-  width: 424px;
+  width: var(--panel-width, 424px);
   display: flex;
   flex-direction: column;
   padding: 16px;
@@ -1186,4 +1186,20 @@ body.light-map #map .leaflet-tile-pane {
   .front-copy h1 {
     font-size: 60px;
   }
+}
+
+.resize-handle {
+  position: absolute;
+  top: 78px;
+  bottom: 18px;
+  left: 580px;
+  width: 6px;
+  z-index: 700;
+  cursor: ew-resize;
+  background: rgba(255,255,255,0.08);
+  transition: background 0.2s;
+}
+
+.resize-handle:hover {
+  background: rgba(246,196,0,0.7);
 }

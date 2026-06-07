@@ -932,3 +932,30 @@ renderAirportDirectory();
 showView(window.location.hash === "#dashboard" ? "dashboard" : "front");
 loadAircraft();
 state.refreshTimer = setInterval(loadAircraft, 20000);
+
+const resizeHandle = document.getElementById("resizeHandle");
+const trackingCard = document.querySelector(".tracking-card");
+
+let isResizing = false;
+
+resizeHandle.addEventListener("mousedown", () => {
+    isResizing = true;
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (!isResizing) return;
+
+    let newWidth = e.clientX - 156;
+
+    newWidth = Math.max(300, Math.min(newWidth, 700));
+
+    trackingCard.style.width = `${newWidth}px`;
+
+    resizeHandle.style.left = `${156 + newWidth}px`;
+
+    localStorage.setItem("panelWidth", newWidth);
+});
+
+document.addEventListener("mouseup", () => {
+    isResizing = false;
+});
